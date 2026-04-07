@@ -5,7 +5,11 @@ import { GoogleGenAI } from "@google/genai";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
 interface Message {
   role: "user" | "bot";
@@ -36,6 +40,10 @@ export function EcoCoach() {
     setIsLoading(true);
 
     try {
+      const ai = getAI();
+      if (!ai) {
+        throw new Error("AI client not available");
+      }
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [

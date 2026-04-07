@@ -6,7 +6,11 @@ import { Button } from "./Button";
 import { Card } from "./Card";
 import { cn } from "../lib/utils";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
 export function WasteIdentifier() {
   const [image, setImage] = React.useState<string | null>(null);
@@ -39,6 +43,10 @@ export function WasteIdentifier() {
     setError(null);
 
     try {
+      const ai = getAI();
+      if (!ai) {
+        throw new Error("AI features are currently unavailable. Please check your configuration.");
+      }
       const base64Data = image.split(",")[1];
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",

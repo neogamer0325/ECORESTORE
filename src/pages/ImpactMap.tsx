@@ -7,7 +7,14 @@ import { cn } from "../lib/utils";
 import { GoogleGenAI } from "@google/genai";
 import { useUser } from "../contexts/UserContext";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const getAI = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("GEMINI_API_KEY is not defined. AI features will be disabled.");
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 interface Location {
   id: string;
@@ -74,6 +81,18 @@ export default function ImpactMap() {
   const findLocations = async () => {
     if (!searchQuery.trim() && !userLocation) return;
     setIsLoading(true);
+
+    const ai = getAI();
+    if (!ai) {
+      // Fallback mock data if no AI client
+      setLocations([
+        { id: "1", name: "Green City Recycling", address: "456 Eco Blvd, Eco City", type: "Mixed Recycling", distance: "0.8 miles", url: "#", status: "pending" },
+        { id: "2", name: "Community Compost Hub", address: "123 Garden Lane, Eco City", type: "Compost", distance: "1.2 miles", url: "#", status: "collected" },
+        { id: "3", name: "Tech-Waste Solutions", address: "789 Silicon Way, Eco City", type: "E-Waste", distance: "2.5 miles", url: "#", status: "in-progress" },
+      ]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await ai.models.generateContent({
