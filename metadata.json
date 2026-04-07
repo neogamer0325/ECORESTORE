@@ -1,0 +1,8 @@
+{
+  "name": "EcoRestore",
+  "description": "A regenerative waste management platform for a sustainable future.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
